@@ -1,13 +1,13 @@
 {
-  "originHash" : "a5aabc1c51d30c9515df315e3e1c044c29f1076dcff8c958b37bae92f5273ba3",
+  "originHash" : "e9d755a4bee518071a3ff81e90fe4238b11d84bc56f25080a7df0a983969721c",
   "pins" : [
     {
       "identity" : "wireguard-apple",
       "kind" : "remoteSourceControl",
-      "location" : "https://git.zx2c4.com/wireguard-apple",
+      "location" : "https://github.com/groupofstars/wireguard-apple",
       "state" : {
-        "revision" : "10da5cfdef362889b438cfbeff867a74e6d717fd",
-        "version" : "1.0.15-26"
+        "revision" : "f8cdfd6a78972c1060b5815728629d6de4e68f9b",
+        "version" : "3.0.0"
       }
     }
   ],

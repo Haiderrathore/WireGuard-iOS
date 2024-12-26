@@ -6,6 +6,7 @@
 //
 
 import NetworkExtension
+import WireGuardKit //finally
 
 class PacketTunnelProvider: NEPacketTunnelProvider {
 
