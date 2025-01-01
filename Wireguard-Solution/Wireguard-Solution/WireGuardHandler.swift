@@ -38,31 +38,52 @@ class WireGuardHandler {
                 "AllowedIPs": allowedIPs
             ]
         ]
-
-        // Encode the configuration dictionary to JSON
-        guard let jsonConfig = try? JSONSerialization.data(withJSONObject: tunnelConfig, options: []) else {
-            completion(NSError(domain: "WireGuardHandler", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to encode configuration"]))
-            return
-        }
-        print (String(data: jsonConfig, encoding: .utf8) ?? "")
-//        print (jsonConfig)
-
-        // Setup NETunnelProviderProtocol
-        let tunnelProtocolConfiguration = NETunnelProviderProtocol()
-        tunnelProtocolConfiguration.providerBundleIdentifier = providerBundleIdentifier
-        tunnelProtocolConfiguration.serverAddress = "172.166.218.240"
-        tunnelProtocolConfiguration.providerConfiguration = ["Config": jsonConfig]
-
-        // Setup NETunnelProviderManager
-        let vpnManager = NETunnelProviderManager()
-        vpnManager.protocolConfiguration = tunnelProtocolConfiguration
-        vpnManager.localizedDescription = "WireGuards VPN"
-        vpnManager.isOnDemandEnabled = true
-        vpnManager.isEnabled = true
-
-        // Save configuration to preferences
-        vpnManager.saveToPreferences { error in
-            completion(error)
+        
+//        // Encode the configuration dictionary to JSON
+//        guard let jsonConfig = try? JSONSerialization.data(withJSONObject: tunnelConfig, options: []) else {
+//            completion(NSError(domain: "WireGuardHandler", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to encode configuration"]))
+//            return
+//        }
+//        
+//        print("Json Config: \(String(decoding: jsonConfig, as: UTF8.self))")
+        print("Json Config: \(tunnelConfig)")
+        
+        NETunnelProviderManager.loadAllFromPreferences { managers, error in
+            if let error = error {
+                completion(error)
+                return
+            }
+            
+            if let existingManager = managers?.first(where: {
+                if let protocolConfig = $0.protocolConfiguration as? NETunnelProviderProtocol {
+                    return protocolConfig.providerBundleIdentifier == providerBundleIdentifier
+                }
+                return false
+            }) {
+                if let tunnelProtocol = existingManager.protocolConfiguration as? NETunnelProviderProtocol {
+                    tunnelProtocol.providerConfiguration = ["Config": tunnelConfig]
+                    existingManager.protocolConfiguration = tunnelProtocol
+                }
+                existingManager.saveToPreferences { error in
+                    completion(error)
+                }
+                return
+            }
+            
+            // Setup a new configuration if none exists
+            let tunnelProtocolConfiguration = NETunnelProviderProtocol()
+            tunnelProtocolConfiguration.providerBundleIdentifier = providerBundleIdentifier
+            tunnelProtocolConfiguration.serverAddress = "172.167.52.97"
+            tunnelProtocolConfiguration.providerConfiguration = ["Config": tunnelConfig]
+            
+            let vpnManager = NETunnelProviderManager()
+            vpnManager.protocolConfiguration = tunnelProtocolConfiguration
+            vpnManager.localizedDescription = "WireGuard VPN"
+            vpnManager.isEnabled = true
+            
+            vpnManager.saveToPreferences { error in
+                completion(error)
+            }
         }
     }
 
